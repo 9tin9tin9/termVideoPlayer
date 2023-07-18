@@ -547,10 +547,34 @@ static AP_DrawCommand* AP_DrawCommand_optimizeCommand(
     return commands;
 }
 
-void AP_clearScreen() {
+void AP_clearScreen(struct AP_Buffer* buf) {
     char sequence[5];
     AP_DrawCommand_ansiSequence(&AP_DrawCommand(CLEAR, 0), sequence, 5);
     flushprint(sequence, sizeof(sequence));
+
+    if (!buf) { return; }
+
+    AP_Buffer* b = AP_Buffer(buf);
+    b->updated = true;
+    free(b->oldBuffer);
+    size_t h = b->height;
+    size_t w = b->width;
+    b->oldBuffer = calloc((h/2 + h%2)*w, sizeof(AP_CharPixel));
+}
+
+void AP_clearScreenRgb(struct AP_BufferRgb* buf) {
+    char sequence[5];
+    AP_DrawCommand_ansiSequence(&AP_DrawCommand(CLEAR, 0), sequence, 5);
+    flushprint(sequence, sizeof(sequence));
+
+    if (!buf) { return; }
+
+    AP_BufferRgb* b = AP_BufferRgb(buf);
+    b->updated = true;
+    free(b->oldBuffer);
+    size_t h = b->height;
+    size_t w = b->width;
+    b->oldBuffer = calloc((h/2 + h%2)*w, sizeof(AP_CharPixelRgb));
 }
 
 void AP_resettextcolor() {

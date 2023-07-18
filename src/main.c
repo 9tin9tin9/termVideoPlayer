@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
         bclose(bmp);
     }
 
-    AP_clearScreen();
+    AP_clearScreen(NULL);
     AP_showcursor(false);
     struct AP_BufferRgb* buf = AP_BufferRgb_new(
         height, width);
@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 
     AP_BufferRgb_del(buf);
     AP_resettextcolor();
-    AP_clearScreen();
+    AP_clearScreen(NULL);
     AP_showcursor(true);
 
     puts("");

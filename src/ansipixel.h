@@ -28,7 +28,8 @@ void AP_BufferRgb_setPixel(
     struct AP_BufferRgb* buf, size_t y, size_t x, AP_ColorRgb color);
 void AP_BufferRgb_draw(struct AP_BufferRgb* buf);
 
-void AP_clearScreen();
+void AP_clearScreen(struct AP_Buffer* buf); // buf can be NULL
+void AP_clearScreenRgb(struct AP_BufferRgb* buf); // buf can be NULL
 void AP_resettextcolor();
 void AP_showcursor(bool show);
 void AP_move(size_t y, size_t x); // move to real text coordinate
