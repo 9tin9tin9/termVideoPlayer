@@ -117,6 +117,10 @@ void AP_Buffer_setPixel(
     AP_Color color)
 {
     AP_Buffer* buffer = AP_Buffer(buf);
+    if (y >= buffer->height || x >= buffer->width) {
+        return;
+    }
+
     size_t index = (y / 2) * buffer->width + x;
     bool subpixel = y % 2;
     AP_CharPixel* charPixel = &buffer->buffer[index];
@@ -215,6 +219,10 @@ void AP_BufferRgb_setPixel(
     AP_ColorRgb color)
 {
     AP_BufferRgb* buffer = AP_BufferRgb(buf);
+    if (y >= buffer->height || x >= buffer->width) {
+        return;
+    }
+
     size_t index = (y / 2) * buffer->width + x;
     bool subpixel = y % 2;
     AP_CharPixelRgb* charPixel = &buffer->buffer[index];
