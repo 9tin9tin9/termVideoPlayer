@@ -29,7 +29,7 @@ void AP_BufferRgb_setPixel(
 void AP_BufferRgb_draw(struct AP_BufferRgb* buf);
 
 void AP_clearScreen();
-void AP_resetcolor();
+void AP_resettextcolor();
 void AP_showcursor(bool show);
 void AP_move(size_t y, size_t x);
 

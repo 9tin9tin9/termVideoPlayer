@@ -86,7 +86,7 @@ void playFrames(
         const uint64_t waitTime = 1000000/INFO.fps;
 
         AP_move(0, 0);
-        AP_resetcolor();
+        AP_resettextcolor();
 
         if (elapsed < waitTime) {
             sleepInUs(waitTime - elapsed);
@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
     playFrames(buf, frames, height, width);
 
     AP_BufferRgb_del(buf);
-    AP_resetcolor();
+    AP_resettextcolor();
     AP_clearScreen();
     AP_showcursor(true);
 

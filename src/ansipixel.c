@@ -28,7 +28,7 @@ typedef struct {
     AP_CharPixel* buffer;
 } AP_Buffer;
 #define AP_Buffer(b) ((AP_Buffer*)(b))
-void AP_Buffer_updateOldBuffer(AP_Buffer* buf);
+static void AP_Buffer_updateOldBuffer(AP_Buffer* buf);
 
 typedef struct {
     bool updated;
@@ -38,7 +38,7 @@ typedef struct {
     AP_CharPixelRgb* buffer;
 } AP_BufferRgb;
 #define AP_BufferRgb(b) ((AP_BufferRgb*)(b))
-void AP_BufferRgb_updateOldBuffer(AP_BufferRgb* buf);
+static void AP_BufferRgb_updateOldBuffer(AP_BufferRgb* buf);
 
 typedef struct {
     enum {
@@ -63,16 +63,16 @@ typedef struct {
 #define AP_DrawCommand(t, ...) ((AP_DrawCommand){.type = t, .t = __VA_ARGS__})
 // unowned string buffer
 // return NULL if strbuf size not large enough
-char* AP_DrawCommand_ansiSequence(
+static char* AP_DrawCommand_ansiSequence(
     AP_DrawCommand* command, char* strbuf, size_t size);
 #define CSI "\e["
 #define HALFBLOCK "▀"
 
 // array has to be freed
 // end of array indicated by AP_DrawCommand.type == END
-AP_DrawCommand* AP_DrawCommand_compileCommand(AP_Buffer* buf);
-AP_DrawCommand* AP_DrawCommand_compileCommandRgb(AP_BufferRgb* buf);
-AP_DrawCommand* AP_DrawCommand_optimizeCommand(AP_DrawCommand* commands);
+static AP_DrawCommand* AP_DrawCommand_compileCommand(AP_Buffer* buf);
+static AP_DrawCommand* AP_DrawCommand_compileCommandRgb(AP_BufferRgb* buf);
+static AP_DrawCommand* AP_DrawCommand_optimizeCommand(AP_DrawCommand* commands);
 
 #define flushprint(s, len) write(STDOUT_FILENO, s, len)
 
@@ -160,7 +160,7 @@ void AP_Buffer_draw(struct AP_Buffer* buf) {
     AP_Buffer_updateOldBuffer(buffer);
 }
 
-void AP_Buffer_updateOldBuffer(AP_Buffer* buf) {
+static void AP_Buffer_updateOldBuffer(AP_Buffer* buf) {
     if (buf->updated) {
         memcpy(
             buf->oldBuffer,
@@ -196,7 +196,11 @@ void AP_BufferRgb_del(struct AP_BufferRgb* buf) {
     free(buffer);
 }
 
-AP_ColorRgb AP_BufferRgb_getPixel(struct AP_BufferRgb* buf, size_t y, size_t x) {
+AP_ColorRgb AP_BufferRgb_getPixel(
+    struct AP_BufferRgb* buf,
+    size_t y,
+    size_t x)
+{
     AP_BufferRgb* buffer = AP_BufferRgb(buf);
     size_t index = (y / 2) * buffer->width + x;
     bool subpixel = y % 2;
@@ -251,7 +255,7 @@ void AP_BufferRgb_draw(struct AP_BufferRgb* buf) {
     AP_BufferRgb_updateOldBuffer(buffer);
 }
 
-void AP_BufferRgb_updateOldBuffer(AP_BufferRgb* buf) {
+static void AP_BufferRgb_updateOldBuffer(AP_BufferRgb* buf) {
     if (buf->updated) {
         memcpy(
             buf->oldBuffer,
@@ -261,7 +265,7 @@ void AP_BufferRgb_updateOldBuffer(AP_BufferRgb* buf) {
     }
 }
 
-int size_t_digits (size_t n) {
+static int size_t_digits (size_t n) {
     if (n < 10) return 1;
     if (n < 100) return 2;
     if (n < 1000) return 3;
@@ -284,7 +288,7 @@ int size_t_digits (size_t n) {
     return 20;
 }
 
-char* AP_DrawCommand_ansiSequence(
+static char* AP_DrawCommand_ansiSequence(
     AP_DrawCommand* command,
     char* strbuf,
     size_t size)
@@ -397,7 +401,7 @@ char* AP_DrawCommand_ansiSequence(
     return strbuf;
 }
 
-AP_DrawCommand* AP_DrawCommand_compileCommand(AP_Buffer* buf) {
+static AP_DrawCommand* AP_DrawCommand_compileCommand(AP_Buffer* buf) {
     #define resize() \
         do { \
             if (len >= capacity) { \
@@ -435,7 +439,7 @@ AP_DrawCommand* AP_DrawCommand_compileCommand(AP_Buffer* buf) {
     #undef resize
 }
 
-AP_DrawCommand* AP_DrawCommand_compileCommandRgb(AP_BufferRgb* buf) {
+static AP_DrawCommand* AP_DrawCommand_compileCommandRgb(AP_BufferRgb* buf) {
     #define resize() \
         do { \
             if (len >= capacity) { \
@@ -479,7 +483,9 @@ AP_DrawCommand* AP_DrawCommand_compileCommandRgb(AP_BufferRgb* buf) {
 // 
 // TODO: More rules?
 // FIXME: Is this really useful? Benchmarks shows seems not that useful
-AP_DrawCommand* AP_DrawCommand_optimizeCommand(AP_DrawCommand* commands) {
+static AP_DrawCommand* AP_DrawCommand_optimizeCommand(
+    AP_DrawCommand* commands)
+{
     struct Pos {
         size_t y, x;
     } lastMovPos = { 0, 0 };
@@ -547,7 +553,7 @@ void AP_clearScreen() {
     flushprint(sequence, sizeof(sequence));
 }
 
-void AP_resetcolor() {
+void AP_resettextcolor() {
     char sequence[5];
     AP_DrawCommand_ansiSequence(&AP_DrawCommand(RESETCOLOR, 0), sequence, 5);
     flushprint(sequence, sizeof(sequence));
@@ -571,11 +577,11 @@ void AP_move(size_t y, size_t x) {
 // algorithm from tmux
 #define COLOUR_FLAG_256 0x01000000
 
-int colour_dist_sq(int R, int G, int B, int r, int g, int b) {
+static int colour_dist_sq(int R, int G, int B, int r, int g, int b) {
     return ((R - r) * (R - r) + (G - g) * (G - g) + (B - b) * (B - b));
 }
 
-int colour_to_6cube(int v) {
+static int colour_to_6cube(int v) {
     if (v < 48) return (0);
     if (v < 114) return (1);
     return ((v - 35) / 40);
