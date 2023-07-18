@@ -31,6 +31,6 @@ void AP_BufferRgb_draw(struct AP_BufferRgb* buf);
 void AP_clearScreen();
 void AP_resettextcolor();
 void AP_showcursor(bool show);
-void AP_move(size_t y, size_t x);
+void AP_move(size_t y, size_t x); // move to real text coordinate
 
 AP_Color AP_rgbTo256(AP_ColorRgb rgb);
