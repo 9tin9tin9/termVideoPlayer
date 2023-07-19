@@ -65,7 +65,7 @@ void readInfo(char* dir, long* ratio, size_t* height, size_t* width) {
 }
 
 void playFrames(
-    struct AP_BufferRgb* buf,
+    struct AP_Buffer* buf,
     AP_ColorRgb** frames,
     size_t height,
     size_t width)
@@ -76,10 +76,11 @@ void playFrames(
 
         for (int i = 2; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                AP_BufferRgb_setPixel(buf, i, j, frames[f][i * width + j]);
+                AP_Color c = AP_rgbTo256(frames[f][i * width + j]);
+                AP_Buffer_setPixel(buf, i, j, c);
             }
         }
-        AP_BufferRgb_draw(buf);
+        AP_Buffer_draw(buf);
 
         uint64_t end = nowInUs();
         uint64_t elapsed = end - start;
@@ -155,12 +156,12 @@ int main(int argc, char** argv) {
 
     AP_clearScreen(NULL);
     AP_showcursor(false);
-    struct AP_BufferRgb* buf = AP_BufferRgb_new(
+    struct AP_Buffer* buf = AP_Buffer_new(
         height, width);
 
     playFrames(buf, frames, height, width);
 
-    AP_BufferRgb_del(buf);
+    AP_Buffer_del(buf);
     AP_resettextcolor();
     AP_clearScreen(NULL);
     AP_showcursor(true);

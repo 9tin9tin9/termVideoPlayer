@@ -142,12 +142,10 @@ void AP_Buffer_draw(struct AP_Buffer* buf) {
     size_t capacity = 1024;
     size_t len = 0;
     char* strbuf = calloc(capacity, 1);
-    char* strbuf_toAppend = strbuf + 1;
-
-
+    char* strbuf_toAppend = strbuf;
     for (AP_DrawCommand* c = commands; c->type != END; c++) {
         strbuf_toAppend = AP_DrawCommand_ansiSequence(
-            c, strbuf_toAppend - 1, capacity - len);
+            c, strbuf_toAppend, capacity - len);
         if (!strbuf_toAppend) {
             strbuf = realloc(strbuf, capacity += deltaCapacity);
             strbuf_toAppend = strbuf + len;
