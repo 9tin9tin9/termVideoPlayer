@@ -80,7 +80,11 @@ static AP_DrawCommand* AP_DrawCommand_optimizeCommand(AP_DrawCommand* commands);
         long long l = (len); \
         long long i = 0; \
         while (l - i > 0) { \
-            i += write(STDOUT_FILENO, s + i, l - i); \
+            int a = write(STDOUT_FILENO, s + i, l - i); \
+            if (a == -1) { \
+                continue; \
+            } \
+            i += a; \
         } \
     } while (0)
 
