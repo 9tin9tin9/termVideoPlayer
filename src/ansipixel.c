@@ -167,9 +167,6 @@ void AP_Buffer_draw(struct AP_Buffer* buf) {
     }
 
     flushprint(strbuf, len);
-    FILE* f = fopen("drawingCommand.log", "w");
-    fputs(strbuf, f);
-    fclose(f);
 
     free(strbuf);
     free(commands);
