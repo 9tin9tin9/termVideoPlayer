@@ -74,7 +74,15 @@ static AP_DrawCommand* AP_DrawCommand_compileCommand(AP_Buffer* buf);
 static AP_DrawCommand* AP_DrawCommand_compileCommandRgb(AP_BufferRgb* buf);
 static AP_DrawCommand* AP_DrawCommand_optimizeCommand(AP_DrawCommand* commands);
 
-#define flushprint(s, len) write(STDOUT_FILENO, s, len)
+#define flushprint(str, len) \
+    do { \
+        char* s = (str); \
+        long long l = (len); \
+        long long i = 0; \
+        while (l - i > 0) { \
+            i += write(STDOUT_FILENO, s + i, l - i); \
+        } \
+    } while (0)
 
 // IMPLEMENTATIONS
 
@@ -82,14 +90,17 @@ struct AP_Buffer* AP_Buffer_new(size_t height, size_t width) {
     AP_Buffer* b = malloc(sizeof(*b));
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    size_t l = (height/2 + height%2)*width;
+    AP_CharPixel* oldBuffer = malloc(l * sizeof(AP_CharPixel));
+    memset(oldBuffer, UINT8_MAX, l * sizeof(AP_CharPixel));
     (*b) = (AP_Buffer){
-        .updated = false,
+        .updated = true,
         .height = height,
         .width = width,
         .termheight = w.ws_row,
         .termwidth = w.ws_col,
-        .oldBuffer = calloc((height/2 + height%2)*width, sizeof(AP_CharPixel)),
-        .buffer = calloc((height/2 + height%2)*width, sizeof(AP_CharPixel)),
+        .oldBuffer = oldBuffer,
+        .buffer = calloc(l, sizeof(AP_CharPixel)),
     };
 
     return (struct AP_Buffer*)b;
@@ -156,6 +167,9 @@ void AP_Buffer_draw(struct AP_Buffer* buf) {
     }
 
     flushprint(strbuf, len);
+    FILE* f = fopen("drawingCommand.log", "w");
+    fputs(strbuf, f);
+    fclose(f);
 
     free(strbuf);
     free(commands);
@@ -429,7 +443,12 @@ static AP_DrawCommand* AP_DrawCommand_compileCommand(AP_Buffer* buf) {
             }
 
             size_t index = i * buf->width + j;
-            if (buf->oldBuffer[index] == buf->buffer[index]) {
+            // This conditional causes initial black screen not to be drawn
+            // if (buf->oldBuffer[index] == buf->buffer[index]) {
+            //     continue;
+            // }
+            if (buf->oldBuffer[index] == buf->buffer[index] &&
+                buf->oldBuffer[index] != UINT16_MAX) {
                 continue;
             }
             resize();
@@ -519,6 +538,7 @@ static AP_DrawCommand* AP_DrawCommand_optimizeCommand(
                     *c = AP_DrawCommand(NL, 0);
                     break;
                 }
+                break;
             }
             case DRAW: {
                 if (!lastCharPixel.init) {
